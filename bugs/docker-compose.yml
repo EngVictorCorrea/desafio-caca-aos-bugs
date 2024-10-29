@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  dima-api:  
+    build:
+      context: .
+      dockerfile: dockerfile.api
+    ports:
+      - "5164:80"
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=80
+      - ConnectionStrings__DefaultConnection=Server=db;Database=DimaDb;User Id=sa;Password=D3s@f10B@lt@;TrustServerCertificate=true;
+    networks:
+      - app-network
+
+  dima-web:
+    build:
+      context: .
+      dockerfile:  dockerfile.web
+    ports:
+      - "5028:81"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production      
+    networks:
+      - app-network
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=D3s@f10B@lt@
+    ports:
+      - "1433:1433" 
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql  
+    networks:
+      - app-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  app-network:
+    driver: bridge  
